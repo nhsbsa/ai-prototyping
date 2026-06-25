@@ -1,0 +1,848 @@
+{% extends 'layout-community.html' %}
+
+{% set pageName = "" %}
+
+{% block beforeContent %}
+{% endblock %}
+
+{% block content %}
+
+
+
+
+<div class="character right">
+  <img id="charRight" src="/assets/images/deanmatthew.gif" alt="Right character">
+</div>
+
+
+
+
+
+
+
+<style>
+.character {
+  position: fixed;
+  bottom: 0;
+  width: 200px;
+  transform-origin: bottom center;
+  pointer-events: none;
+  padding-bottom: 10px;
+}
+
+.character.left { left: 0; }
+.character.right { right: 0; }
+
+.character img {
+  width: 100%;
+  transition: transform 0.3s ease-out;
+}
+</style>
+
+<script>
+document.addEventListener("mousemove", (e) => {
+  const mouseX = e.clientX;
+  const mouseY = e.clientY;
+
+  const rotateTowardMouse = (img) => {
+    const rect = img.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height; // bottom of image (neck)
+    const angle = Math.atan2(mouseY - centerY, mouseX - centerX);
+    const degrees = angle * (180 / Math.PI);
+    img.style.transform = `rotate(${degrees}deg)`;
+  };
+
+  rotateTowardMouse(document.getElementById("charLeft"));
+  rotateTowardMouse(document.getElementById("charRight"));
+});
+</script>
+
+
+
+    <h1 class="nhsuk-heading-l" id="riddle"></h1>
+
+    <div class="nhsuk-form-group" style="margin-top: 30px;">
+      <label class="nhsuk-label">
+        Enter 4-digit access code
+      </label>
+
+      <div style="display:flex; gap:10px;">
+        <input class="digit-box" maxlength="1" inputmode="numeric">
+        <input class="digit-box" maxlength="1" inputmode="numeric">
+        <input class="digit-box" maxlength="1" inputmode="numeric">
+        <input class="digit-box" maxlength="1" inputmode="numeric">
+      </div>
+
+      <button class="nhsuk-button" id="submitBtn" style="margin-top:20px;">
+        Submit
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- INCORRECT SCREEN -->
+<div id="failureScreen">INCORRECT<br><BR>BACK TO THE START YOU GO</div>
+
+<!-- ✅ CORRECT SCREEN (ADDED) -->
+<div id="successScreen">CORRECT</div>
+
+<style>
+  /* =========================================================
+   DIGIT BOXES
+   ========================================================= */
+
+  .digit-box {
+    width: 50px;
+    height: 60px;
+    font-size: 28px;
+    text-align: center;
+    border: 2px dashed #005eb8;
+    transform: skewX(-2deg);
+  }
+
+  .digit-box:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(255, 0, 85, 0.3);
+    transform: scale(1.05);
+  }
+
+  /* =========================================================
+   FAILURE SCREEN
+   ========================================================= */
+
+  #failureScreen {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: black;
+    color: #ff0055;
+    font-size: 70px;
+    font-weight: bold;
+    letter-spacing: 8px;
+
+    opacity: 0;
+    pointer-events: none;
+    z-index: 99999;
+
+    text-shadow:
+      2px 0 #00ffff,
+      -2px 0 #ff0055;
+  }
+
+  #failureScreen.active {
+    opacity: 1;
+    animation: glitchExplode 0.6s infinite;
+  }
+
+  /* =========================================================
+   ✅ SUCCESS SCREEN (ADDED)
+   ========================================================= */
+
+  #successScreen {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #001a10;
+    color: #00ff88;
+    font-size: 80px;
+    font-weight: 900;
+    letter-spacing: 10px;
+
+    opacity: 0;
+    pointer-events: none;
+    z-index: 99999;
+
+    text-shadow:
+      2px 0 #00ffff,
+      -2px 0 #00ff88;
+  }
+
+  #successScreen.active {
+    opacity: 1;
+    animation: successGlitch 0.5s infinite;
+  }
+
+  @keyframes successGlitch {
+    0% { transform: translate(0,0); filter: hue-rotate(0deg); }
+    25% { transform: translate(-3px,2px); }
+    50% { transform: translate(3px,-2px); filter: hue-rotate(60deg); }
+    75% { transform: translate(-2px,-1px); }
+    100% { transform: translate(0,0); filter: hue-rotate(0deg); }
+  }
+
+  @keyframes glitchExplode {
+    0% { transform: scale(1) translate(0, 0); }
+    25% { transform: scale(1.05) translate(5px, -3px); }
+    50% { transform: scale(0.98) translate(-5px, 3px); }
+    75% { transform: scale(1.08) translate(6px, 2px); }
+    100% { transform: scale(1) translate(0, 0); }
+  }
+
+  #riddle {
+    white-space: pre-line;
+  }
+</style>
+
+<script>
+  /* =========================================================
+     STAGES
+     ========================================================= */
+
+  const stages = [
+    {
+      riddle: `I am a book that has no page,
+I speak in light instead of age.
+
+I live where fingers start to type,
+and wake when tapped, both wrong and right.`,
+      code: "4821"
+    },
+    {
+      riddle: `With pointed fangs I sit and wait;
+with piercing force I crunch out fate;
+grabbing victims, proclaiming might;
+physically joining with a single bite.`,
+      code: "1934"
+    },
+    {
+      riddle: `I have lakes with no water,
+mountains with no stone,
+and cities with no buildings.
+What am I?`,
+      code: "5072"
+    },
+    {
+      riddle: `Every night I’m told what to do,
+and each morning I do what I’m told.
+But I still don’t escape your scold.
+What am I?`,
+      code: "6408"
+    },
+    {
+      riddle: `What invention lets you look right through a wall?`,
+      code: "9143"
+    },
+    {
+      riddle: `Where is the only place where today comes before yesterday?`,
+      code: "2210"
+    }
+  ];
+
+  let stage = 0;
+
+  const riddleEl = document.getElementById("riddle");
+  const inputs = document.querySelectorAll(".digit-box");
+  const button = document.getElementById("submitBtn");
+  const failureScreen = document.getElementById("failureScreen");
+  const successScreen = document.getElementById("successScreen");
+
+  function loadStage() {
+    riddleEl.textContent = stages[stage].riddle;
+    inputs.forEach(i => i.value = "");
+    inputs[0].focus();
+  }
+
+  loadStage();
+
+  /* input handling */
+  inputs.forEach((input, i) => {
+    input.addEventListener("input", () => {
+      input.value = input.value.replace(/[^0-9]/g, "");
+      if (input.value && i < inputs.length - 1) {
+        inputs[i + 1].focus();
+      }
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Backspace" && !input.value && i > 0) {
+        inputs[i - 1].focus();
+      }
+    });
+  });
+
+  /* =========================================================
+     SUBMIT
+     ========================================================= */
+
+  button.addEventListener("click", () => {
+    const code = Array.from(inputs).map(i => i.value).join("");
+
+    if (code === stages[stage].code) {
+      triggerSuccess();
+    } else {
+      triggerFailure();
+    }
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") button.click();
+  });
+
+  /* =========================================================
+     SUCCESS (ADDED)
+     ========================================================= */
+
+  function triggerSuccess() {
+    successScreen.classList.add("active");
+
+    setTimeout(() => {
+      successScreen.classList.remove("active");
+
+      stage++;
+
+      if (stage >= stages.length) {
+        window.location.href = "final-question";
+      } else {
+        loadStage();
+      }
+
+    }, 2000);
+  }
+
+  /* =========================================================
+     FAILURE
+     ========================================================= */
+
+  function triggerFailure() {
+    failureScreen.classList.add("active");
+
+    document.body.style.filter = "contrast(2) hue-rotate(90deg)";
+
+    setTimeout(() => {
+      window.location.href = "start.html";
+    }, 3000);
+  }
+</script>
+
+<style>
+  /* ========================================================= NHS TOOLKIT: CORRUPTED SYSTEM THEME (FULL BUILD v2) ========================================================= */
+  /* =============================== GLOBAL BASE INSTABILITY =============================== */
+  * {
+    transition: all 0.2s ease-in-out;
+  }
+
+  body {
+    filter: contrast(1.25) saturate(1.3) hue-rotate(6deg);
+    animation: pageDrift 5s infinite;
+    image-rendering: pixelated;
+    will-change: transform;
+  }
+
+  @keyframes pageDrift {
+    0% {
+      transform: translate(0px, 0px);
+    }
+
+    20% {
+      transform: translate(1px, -1px);
+    }
+
+    40% {
+      transform: translate(-1px, 1px);
+    }
+
+    60% {
+      transform: translate(2px, 0px);
+    }
+
+    80% {
+      transform: translate(-2px, -1px);
+    }
+
+    100% {
+      transform: translate(0px, 0px);
+    }
+  }
+
+  /* =============================== HEADER BASE + GLITCH BAR =============================== */
+  .govuk-header,
+  .nhsuk-header {
+    position: relative;
+    overflow: hidden;
+    animation: headerJitter 2.8s infinite;
+  }
+
+  /* blue bar pixel corruption layer */
+  .govuk-header::before,
+  .nhsuk-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #005eb8;
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px), linear-gradient(0deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 6px 6px;
+    mix-blend-mode: overlay;
+    opacity: 0.75;
+    animation: pixelShift 0.6s infinite steps(2, end), barNoise 1.8s infinite;
+    pointer-events: none;
+  }
+
+  /* slice tearing layer */
+  .govuk-header::after,
+  .nhsuk-header::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #005eb8;
+    clip-path: polygon(0 0, 100% 0, 100% 18%, 0 22%, 100% 26%, 0 32%, 100% 38%, 0 44%, 100% 52%, 0 58%, 100% 66%, 0 74%, 100% 82%, 0 90%, 100% 100%, 0 100%);
+    opacity: 0.6;
+    animation: sliceJitter 1.2s infinite linear;
+    pointer-events: none;
+  }
+
+  @keyframes pixelShift {
+    0% {
+      transform: translate(0, 0);
+    }
+
+    25% {
+      transform: translate(1px, -1px);
+    }
+
+    50% {
+      transform: translate(-1px, 1px);
+    }
+
+    75% {
+      transform: translate(2px, 0);
+    }
+
+    100% {
+      transform: translate(0, 0);
+    }
+  }
+
+  @keyframes barNoise {
+    0% {
+      filter: brightness(1) contrast(1.2);
+    }
+
+    50% {
+      filter: brightness(1.1) contrast(1.4);
+    }
+
+    100% {
+      filter: brightness(1) contrast(1.2);
+    }
+  }
+
+  @keyframes sliceJitter {
+    0% {
+      transform: translateX(0);
+    }
+
+    25% {
+      transform: translateX(-2px);
+    }
+
+    50% {
+      transform: translateX(2px);
+    }
+
+    75% {
+      transform: translateX(-1px);
+    }
+
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes headerJitter {
+    0% {
+      transform: translate(0, 0);
+    }
+
+    25% {
+      transform: translate(1px, -1px);
+    }
+
+    50% {
+      transform: translate(-1px, 1px);
+    }
+
+    75% {
+      transform: translate(2px, 0);
+    }
+
+    100% {
+      transform: translate(0, 0);
+    }
+  }
+
+  /* =============================== SERVICE NAME OVERRIDE =============================== */
+  .govuk-header__service-name,
+  .nhsuk-header__service-name {
+    position: relative;
+    color: transparent !important;
+  }
+
+  .govuk-header__service-name::after,
+  .nhsuk-header__service-name::after {
+    content: "Save Us";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #fff;
+    font-weight: bold;
+    letter-spacing: 2px;
+    animation: textGlitch 2.2s infinite;
+  }
+
+  @keyframes textGlitch {
+    0% {
+      transform: translate(0, 0);
+      text-shadow: 1px 0 #00ffff, -1px 0 #ff0055;
+    }
+
+    25% {
+      transform: translate(1px, -1px);
+      text-shadow: -2px 0 #00ffff, 2px 0 #ff0055;
+    }
+
+    50% {
+      transform: translate(-1px, 1px);
+      text-shadow: 2px 0 #00ffff, -2px 0 #ff0055;
+    }
+
+    75% {
+      transform: translate(2px, 0);
+      text-shadow: 1px 1px #00ffff, -1px -1px #ff0055;
+    }
+
+    100% {
+      transform: translate(0, 0);
+      text-shadow: 1px 0 #00ffff, -1px 0 #ff0055;
+    }
+  }
+
+  /* =============================== TYPOGRAPHY CORRUPTION =============================== */
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  position: relative;
+  display: inline-block;
+  transform-origin: center;
+  letter-spacing: 1px;
+  image-rendering: pixelated;
+}
+
+h1 {
+  animation: h1Glitch 0.8s infinite steps(2, end);
+  text-shadow:
+    3px 0 #00ffff,
+    -3px 0 #ff0055,
+    0 0 12px rgba(255, 0, 85, 0.35);
+  filter: contrast(1.3);
+}
+
+/* jagged tearing slices */
+h1::before {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0px,
+      transparent 8px,
+      rgba(0, 255, 255, 0.18) 8px,
+      rgba(0, 255, 255, 0.18) 11px
+    );
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 10%,
+    0 15%,
+    100% 20%,
+    0 28%,
+    100% 35%,
+    0 42%,
+    100% 52%,
+    0 60%,
+    100% 72%,
+    0 84%,
+    100% 100%,
+    0 100%
+  );
+  mix-blend-mode: screen;
+  opacity: .65;
+  animation: h1Slices 1.45s infinite;
+  pointer-events: none;
+}
+
+/* occasional red corruption flash */
+h1::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 5px,
+      rgba(255, 0, 85, 0.2) 5px,
+      rgba(255, 0, 85, 0.2) 7px
+    );
+  opacity: .5;
+  mix-blend-mode: lighten;
+  animation: h1Corrupt 1.1s infinite;
+  pointer-events: none;
+}
+
+h2::after {
+  content: " ⚠";
+  color: red;
+}
+
+@keyframes h1Glitch {
+  0% {
+    transform: translate(0, 0) rotate(-0.2deg);
+  }
+
+  10% {
+    transform: translate(-2px, 1px) skewX(-8deg);
+  }
+
+  20% {
+    transform: translate(3px, -1px) skewX(8deg);
+  }
+
+  30% {
+    transform: translate(-1px, 2px);
+  }
+
+  40% {
+    transform: translate(4px, 0px) rotate(0.5deg);
+  }
+
+  50% {
+    transform: translate(-3px, -2px) skewY(2deg);
+  }
+
+  60% {
+    transform: translate(2px, 1px);
+  }
+
+  70% {
+    transform: translate(-4px, 0px);
+  }
+
+  80% {
+    transform: translate(3px, -1px);
+  }
+
+  90% {
+    transform: translate(-1px, 1px);
+  }
+
+  100% {
+    transform: translate(0, 0) rotate(-0.2deg);
+  }
+}
+
+@keyframes h1Slices {
+  0% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-6px);
+  }
+
+  50% {
+    transform: translateX(6px);
+  }
+
+  75% {
+    transform: translateX(-3px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes h1Corrupt {
+  0%,
+  45%,
+  100% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+
+  50% {
+    opacity: .9;
+    transform: translateX(-8px);
+  }
+
+  55% {
+    opacity: .4;
+    transform: translateX(8px);
+  }
+
+  60% {
+    opacity: 0;
+    transform: translateX(0);
+  }
+}
+
+h1:hover {
+  animation-duration: 0.12s;
+  text-shadow:
+    6px 0 #00ffff,
+    -6px 0 #ff0055,
+    0 0 20px rgba(255, 0, 85, 0.5);
+}
+
+  /* =============================== LINKS INSTABILITY =============================== */
+  a {
+    display: inline-block;
+    transform: rotate(calc(var(--r, 0) * 1deg));
+  }
+
+  a:nth-of-type(odd) {
+    --r: -1;
+  }
+
+  a:nth-of-type(even) {
+    --r: 1;
+  }
+
+  a:hover {
+    transform: scale(1.05) rotate(-2deg);
+    text-decoration: underline wavy red;
+  }
+
+  /* =============================== BUTTON CORRUPTION =============================== */
+  .govuk-button,
+  .nhsuk-button {
+    transform: skewX(-6deg);
+    animation: buttonShake 1.5s infinite;
+    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  @keyframes buttonShake {
+    0% {
+      transform: skewX(-6deg) translateX(0);
+    }
+
+    50% {
+      transform: skewX(-6deg) translateX(2px);
+    }
+
+    100% {
+      transform: skewX(-6deg) translateX(0);
+    }
+  }
+
+  /* =============================== CARDS DRIFT =============================== */
+  .nhsuk-card,
+  .govuk-summary-card {
+    transform: rotate(calc(var(--rot, 0) * 1deg));
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.15);
+  }
+
+  .nhsuk-card:nth-child(odd) {
+    --rot: -1;
+  }
+
+  .nhsuk-card:nth-child(even) {
+    --rot: 1;
+  }
+
+  /* =============================== FORM CORRUPTION =============================== */
+  input,
+  textarea,
+  select {
+    border: 2px dashed #ff0055 !important;
+    background: repeating-linear-gradient(45deg, #fff, #fff 10px, #f3f3f3 10px, #f3f3f3 20px);
+    transform: skewX(-1deg);
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(255, 0, 85, 0.4);
+    transform: scale(1.01);
+  }
+
+  /* =============================== SYSTEM FOOTER FLICKER =============================== */
+  body::after {
+    content: "SYSTEM DESYNC ACTIVE // DESIGN INTEGRITY LOST";
+    position: fixed;
+    bottom: 12px;
+    left: 12px;
+    background: black;
+    color: lime;
+    font-family: monospace;
+    font-size: 12px;
+    padding: 8px;
+    z-index: 99999;
+    animation: flicker 0.35s infinite;
+    pointer-events: none;
+  }
+
+  @keyframes flicker {
+    0% {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+
+    25% {
+      opacity: 0.2;
+      transform: translate(1px, 0);
+    }
+
+    50% {
+      opacity: 1;
+      transform: translate(-1px, 1px);
+    }
+
+    75% {
+      opacity: 0.4;
+      transform: translate(2px, -1px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
+  }
+
+  /* =============================== PAGE BREATHING INSTABILITY =============================== */
+  .govuk-width-container,
+  .nhsuk-width-container {
+    animation: breathe 4s infinite ease-in-out;
+  }
+
+  @keyframes breathe {
+    0% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.003);
+    }
+
+    100% {
+      transform: scale(1);
+    }
+  }
+</style>
+
+{% endblock %}

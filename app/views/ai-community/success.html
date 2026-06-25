@@ -1,0 +1,253 @@
+{% extends 'layout-community.html' %}
+
+{% set pageName = "" %}
+
+{% block beforeContent %}
+{% endblock %}
+
+{% block content %}
+
+<div class="nhsuk-grid-row">
+  <div class="nhsuk-grid-column-two-thirds">
+
+    <!-- SUCCESS CONTENT (FORCED FRONT) -->
+    <div class="success-container">
+      <h1 class="success-title">Well done</h1>
+
+      <p class="success-text" style="color: white;">
+        You've cracked the riddles and unlocked one of the deactivation codes.
+      </p>
+
+      <div class="code-box">
+        DEACTIVATION CODE: <span>4</span>
+      </div><br>
+
+      <a href="start" class="nhsuk-button" id="submitBtn" style="margin-top:20px;">
+        Return to start
+      </a>
+
+      <style>
+        .govuk-button,
+        .nhsuk-button {
+          transform: skewX(-10deg);
+          animation: buttonShake 1.5s infinite;
+          box-shadow: 6px 6px 0 rgba(255, 255, 255, 0.2);
+        }
+      </style>
+
+
+    </div>
+
+    <!-- EFFECT LAYERS (BEHIND TEXT) -->
+    <div id="confetti"></div>
+    <canvas id="fireworks"></canvas>
+
+  </div>
+</div>
+
+<style>
+  /* ================= LAYER FIX ================= */
+
+  .success-container {
+    position: relative;
+    z-index: 50;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    margin-top: 60px;
+    width: 100%;
+  }
+
+  .success-title {
+    font-size: 48px;
+    font-weight: bold;
+    color: #00ff88;
+    text-shadow: 2px 0 #ff0055, -2px 0 #00ffff;
+  }
+
+  .success-text {
+    font-size: 20px;
+    margin-top: 20px;
+  }
+
+  .code-box {
+    margin-top: 30px;
+    padding: 20px;
+    border: 2px dashed #005eb8;
+    display: inline-block;
+    font-size: 24px;
+    background: #fff;
+    transform: skewX(-3deg);
+  }
+
+  /* ================= BACKGROUND EFFECTS ================= */
+
+  #confetti {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 8px;
+    height: 12px;
+    animation: fall 3s linear forwards;
+  }
+
+  @keyframes fall {
+    0% {
+      transform: translateY(-10vh) rotate(0deg);
+    }
+
+    100% {
+      transform: translateY(110vh) rotate(720deg);
+    }
+  }
+
+  #fireworks {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  /* ================= ENSURE PAGE DOESN’T GET COVERED ================= */
+
+  .govuk-width-container,
+  .nhsuk-width-container {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* ================= ANIMATION ================= */
+
+  @keyframes popIn {
+    0% {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+</style>
+
+<script>
+  /* ================= CONFETTI ================= */
+
+  function createConfetti() {
+    const container = document.getElementById("confetti");
+    const colors = ["#00ff88", "#005eb8", "#ff0055", "#ffff00"];
+
+    for (let i = 0; i < 120; i++) {
+      const el = document.createElement("div");
+      el.className = "confetti-piece";
+
+      el.style.left = Math.random() * 100 + "vw";
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.animationDuration = (Math.random() * 2 + 2) + "s";
+
+      container.appendChild(el);
+    }
+  }
+
+  /* ================= FIREWORKS ================= */
+
+  const canvas = document.getElementById("fireworks");
+  const ctx = canvas.getContext("2d");
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  let particles = [];
+
+  function Particle(x, y) {
+    this.x = x;
+    this.y = y;
+    this.dx = (Math.random() - 0.5) * 6;
+    this.dy = (Math.random() - 0.5) * 6;
+    this.life = 80;
+    this.color = `hsl(${Math.random() * 360},100%,60%)`;
+  }
+
+  function explode(x, y) {
+    for (let i = 0; i < 35; i++) {
+      particles.push(new Particle(x, y));
+    }
+  }
+
+  function animate() {
+    requestAnimationFrame(animate);
+
+    ctx.fillStyle = "rgba(0,0,0,0.15)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    particles.forEach((p, i) => {
+      p.x += p.dx;
+      p.y += p.dy;
+      p.life--;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+
+      if (p.life <= 0) particles.splice(i, 1);
+    });
+  }
+
+  /* start effects */
+  createConfetti();
+  animate();
+
+  /* periodic fireworks */
+  setInterval(() => {
+    explode(Math.random() * window.innerWidth, Math.random() * window.innerHeight / 2);
+  }, 600);
+</script>
+
+<style>
+  /* ================= YOUR THEME (UNCHANGED) ================= */
+
+  * {
+    transition: all 0.2s ease-in-out;
+  }
+
+  body {
+    filter: contrast(1.25) saturate(1.3) hue-rotate(6deg);
+    animation: pageDrift 5s infinite;
+  }
+
+  @keyframes pageDrift {
+    0% {
+      transform: translate(0px, 0px);
+    }
+
+    50% {
+      transform: translate(1px, -1px);
+    }
+
+    100% {
+      transform: translate(0px, 0px);
+    }
+  }
+
+  h1::after {
+    content: " ⚠";
+    color: red;
+  }
+</style>
+
+
+
+{% endblock %}
