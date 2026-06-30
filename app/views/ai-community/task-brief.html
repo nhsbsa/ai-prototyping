@@ -1,0 +1,212 @@
+{% extends "layout.html" %}
+
+{% set pageName = "Mission briefing" %}
+
+{% block beforeContent %}{% endblock %}
+
+{% block content %}
+
+<div class="mission-theme">
+
+  <div class="nhsuk-grid-row mission-centre">
+    <div class="nhsuk-grid-column-two-thirds">
+
+      <h1 class="nhsuk-heading-xl">
+        Mission briefing
+      </h1>
+
+      <div class="nhsuk-warning-callout">
+
+        <h2 class="nhsuk-warning-callout__label">
+          SECURITY BREACH DETECTED
+        </h2>
+
+        <p>
+          Following the ongoing <strong>DesignersRIP</strong> crisis, an emergency signal has been traced to a single compromised device.
+        </p>
+
+        <p><strong>Dean Cobb's laptop has been recovered.</strong></p>
+
+        <p>A handwritten sticky note reads:</p>
+
+        <blockquote class="nhsuk-inset-text">
+          <p><strong>"SAVE DESIGN. Help me BSA designers, you're our only hope."</strong></p>
+        </blockquote>
+
+        <p>
+          The prototype contains an encrypted deactivation fragment.
+        </p>
+
+      </div>
+
+      <h2 class="nhsuk-heading-l">Your mission</h2>
+
+      <p>Use the laptop to solve a series of riddles.</p>
+
+      <p>Each riddle leads to a location in the room.</p>
+
+      <p>Find the hidden <strong>4-digit codes</strong> and enter them into the system.</p>
+
+      <p>Repeat until the final fragment is recovered.</p>
+
+      <hr class="nhsuk-section-break nhsuk-section-break--l nhsuk-section-break--visible">
+
+      <h2 class="nhsuk-heading-l">Mission rules</h2>
+
+      <ul class="nhsuk-list nhsuk-list--bullet">
+        <li>Work as a team</li>
+        <li>Leave codes in place for other teams</li>
+        <li>Be discreet while searching</li>
+        <li>Alert a facilitator if a code is missing</li>
+      </ul>
+
+      <div class="nhsuk-inset-text">
+        <p><strong>Good luck.</strong><br>The future of BSA Design depends on you.</p>
+      </div>
+
+      <a href="start" class="mission-start">
+        Start mission
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M13.3 4.3l-1.4 1.4L17.2 11H4v2h13.2l-5.3 5.3 1.4 1.4L21 12z"/>
+        </svg>
+      </a>
+
+    </div>
+  </div>
+
+</div>
+
+<style>
+
+/* ===========================
+   REMOVE HEADER + FOOTER (SAFE)
+   =========================== */
+
+.nhsuk-header,
+.nhsuk-footer {
+  display: none !important;
+}
+
+/* remove spacing NHS adds */
+.nhsuk-width-container {
+  margin-top: 0 !important;
+}
+
+/* ===========================
+   CENTRE EVERYTHING
+   =========================== */
+
+.mission-centre {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+}
+
+.mission-centre .nhsuk-grid-column-two-thirds {
+  margin: 0 auto;
+  float: none;
+}
+
+/* centre lists properly */
+.mission-centre ul {
+  display: inline-block;
+  text-align: left;
+}
+
+/* ===========================
+   DARK THEME BACKGROUND
+   =========================== */
+
+html, body {
+  background: #05070c !important;
+}
+
+/* subtle background glow */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+
+  background:
+    radial-gradient(circle at 20% 20%, rgba(0,245,255,0.08), transparent 40%),
+    radial-gradient(circle at 80% 40%, rgba(255,255,255,0.05), transparent 35%),
+    radial-gradient(circle at 50% 80%, rgba(0,245,255,0.06), transparent 45%);
+}
+
+/* keep content above */
+.nhsuk-width-container {
+  position: relative;
+  z-index: 2;
+}
+
+/* ===========================
+   TEXT COLOURS
+   =========================== */
+
+p, li, label {
+  color: #d1d5db;
+}
+
+h1, h2, h3 {
+  color: #ffffff;
+}
+
+a {
+  color: #8cc8ff;
+}
+
+/* ===========================
+   WARNING CALLOUT
+   =========================== */
+
+.nhsuk-warning-callout {
+  background: rgba(255,255,255,0.04);
+  border-left: 6px solid #00f5ff;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,245,255,0.1);
+  text-align: left; /* keep readable */
+}
+
+.nhsuk-warning-callout__label {
+  background: #00f5ff;
+  color: #05070c;
+  border-radius: 999px;
+  padding: 4px 10px;
+  display: inline-block;
+}
+
+/* ===========================
+   START BUTTON
+   =========================== */
+
+.mission-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 32px;
+  padding: 16px 28px;
+  background: #005eb8;
+  color: #fff !important;
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: 700;
+  border-radius: 8px;
+  box-shadow: 0 5px 0 #003d78;
+}
+
+.mission-start:hover {
+  background: #004a93;
+  transform: translateY(-2px);
+}
+
+.mission-start svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+</style>
+
+{% endblock %}
