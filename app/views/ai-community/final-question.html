@@ -1,3 +1,4 @@
+
 {% extends 'layout-community.html' %}
 
 {% set pageName = "" %}
@@ -18,14 +19,29 @@
         Which of the following statements must therefore be false?
       </h1>
 
-      <img id="finalImage" src="/assets/images/4-people.webp" alt="Final puzzle image"
-        style="width:100%; margin:20px 0;">
+      <img
+        id="finalImage"
+        src="/assets/images/4-people.webp"
+        alt="Final puzzle image"
+        style="width:100%; margin:20px 0;"
+      >
 
       <div id="finalOptions">
-        <button class="nhsuk-button option-btn">1. The adults are married</button>
-        <button class="nhsuk-button option-btn">2. The kids are siblings</button>
-        <button class="nhsuk-button option-btn">3. There are no child AI bots</button>
-        <button class="nhsuk-button option-btn">4. One adult is a human</button>
+        <button class="nhsuk-button option-btn">
+          1. The adults are married
+        </button>
+
+        <button class="nhsuk-button option-btn">
+          2. The kids are siblings
+        </button>
+
+        <button class="nhsuk-button option-btn">
+          3. There are no child AI bots
+        </button>
+
+        <button class="nhsuk-button option-btn">
+          4. One adult is a human
+        </button>
       </div>
 
       <div id="timer" style="margin-top:15px; font-weight:bold;"></div>
@@ -34,46 +50,115 @@
 
     <!-- INTRO OVERLAY -->
     <div id="introOverlay" class="intro-overlay">
+
       <div class="intro-box">
+
         <p>
           Well done, you've solved all the riddles.<br><br>
+
           One final brain teaser lies between you and one of the deactivation codes.<br><br>
+
           But be careful — an error here would be disastrous.<br><br>
+
           You will have 90 seconds to give your final answer.
         </p>
 
         <button class="nhsuk-button" id="continueBtn">
           Continue
         </button>
+
       </div>
+
     </div>
 
     <!-- TIME UP MODAL -->
     <div id="timeUpModal" class="modal hidden">
+
       <div class="modal-box">
+
         <h2>Time is up</h2>
-        <p>Back to the start you go...</p>
+
+        <p>
+          Back to the start you go...
+        </p>
+
       </div>
+
     </div>
 
   </div>
 </div>
 
 <script>
-  const options = document.querySelectorAll(".option-btn");
+  /* =========================================================
+     FINAL QUESTION ACCESS PROTECTION
+     ========================================================= */
+
+  const TOTAL_QUESTIONS = 6;
+  const PROGRESS_KEY = "saveUsProgress";
+
+  const savedProgress =
+    parseInt(sessionStorage.getItem(PROGRESS_KEY), 10);
+
+  /*
+   * The final question can ONLY be accessed after all
+   * six main questions have been completed.
+   *
+   * If somebody manually types /final-question into the
+   * address bar, they get sent back to start.
+   */
+  if (
+    isNaN(savedProgress) ||
+    savedProgress < TOTAL_QUESTIONS
+  ) {
+    window.location.replace("start.html");
+  }
+
+  /* =========================================================
+     FINAL ANSWERS
+     ========================================================= */
+
+  const options =
+    document.querySelectorAll(".option-btn");
 
   options.forEach(btn => {
-    btn.addEventListener("click", () => {
-      const text = btn.textContent;
 
-      // ONLY correct answer
+    btn.addEventListener("click", () => {
+
+      const text = btn.textContent.trim();
+
+      /*
+       * Correct answer
+       */
       if (text.startsWith("3.")) {
-        window.location.href = "success.html";
+
+        /*
+         * Clear the puzzle progress now that the final
+         * question has been successfully completed.
+         */
+        sessionStorage.removeItem(PROGRESS_KEY);
+        sessionStorage.removeItem("saveUsFailed");
+
+        window.location.replace("success.html");
+
       } else {
-        // optional: you could add your "incorrect popup" here later
-        window.location.href = "start.html";
+
+        /*
+         * Wrong answer = complete failure.
+         *
+         * Clear all progress so they cannot use Back
+         * to return to the completed riddles.
+         */
+        sessionStorage.removeItem(PROGRESS_KEY);
+
+        sessionStorage.setItem("saveUsFailed", "true");
+
+        window.location.replace("start.html");
+
       }
+
     });
+
   });
 </script>
 
@@ -88,7 +173,10 @@
     width: 100%;
   }
 
-  /* OVERLAY (FIXED so it ALWAYS covers page correctly) */
+  /* =========================================================
+     INTRO OVERLAY
+     ========================================================= */
+
   .intro-overlay {
     position: fixed;
     inset: 0;
@@ -109,7 +197,10 @@
     background: rgba(0,0,0,0.9);
   }
 
-  /* MODAL */
+  /* =========================================================
+     MODAL
+     ========================================================= */
+
   .modal {
     position: fixed;
     inset: 0;
@@ -135,46 +226,83 @@
 </style>
 
 <script>
-  const introOverlay = document.getElementById("introOverlay");
-  const continueBtn = document.getElementById("continueBtn");
+  /* =========================================================
+     TIMER
+     ========================================================= */
 
-  const timerEl = document.getElementById("timer");
-  const timeUpModal = document.getElementById("timeUpModal");
+  const introOverlay =
+    document.getElementById("introOverlay");
+
+  const continueBtn =
+    document.getElementById("continueBtn");
+
+  const timerEl =
+    document.getElementById("timer");
+
+  const timeUpModal =
+    document.getElementById("timeUpModal");
 
   let timeLeft = 90;
   let timerInterval;
 
   function startTimer() {
-    timerEl.textContent = `Time remaining: ${timeLeft}s`;
+
+    timerEl.textContent =
+      `Time remaining: ${timeLeft}s`;
 
     timerInterval = setInterval(() => {
+
       timeLeft--;
-      timerEl.textContent = `Time remaining: ${timeLeft}s`;
+
+      timerEl.textContent =
+        `Time remaining: ${timeLeft}s`;
 
       if (timeLeft <= 0) {
+
         clearInterval(timerInterval);
+
         showTimeUp();
+
       }
-    }, 2000);
+
+    }, 1000);
   }
 
   function showTimeUp() {
+
+    /*
+     * Time running out also counts as failure.
+     */
+    sessionStorage.removeItem(PROGRESS_KEY);
+
+    sessionStorage.setItem(
+      "saveUsFailed",
+      "true"
+    );
+
     timeUpModal.classList.remove("hidden");
 
     setTimeout(() => {
-      window.location.href = "start.html";
+
+      window.location.replace("start.html");
+
     }, 2000);
   }
 
   continueBtn.addEventListener("click", () => {
+
     introOverlay.style.display = "none";
+
     startTimer();
+
   });
 </script>
 
 <style>
-  /* ========================================================= NHS TOOLKIT: CORRUPTED SYSTEM THEME (FULL BUILD v2) ========================================================= */
-  /* =============================== GLOBAL BASE INSTABILITY =============================== */
+  /* =========================================================
+     NHS TOOLKIT: CORRUPTED SYSTEM THEME
+     ========================================================= */
+
   * {
     transition: all 0.2s ease-in-out;
   }
@@ -187,32 +315,14 @@
   }
 
   @keyframes pageDrift {
-    0% {
-      transform: translate(0px, 0px);
-    }
-
-    20% {
-      transform: translate(1px, -1px);
-    }
-
-    40% {
-      transform: translate(-1px, 1px);
-    }
-
-    60% {
-      transform: translate(2px, 0px);
-    }
-
-    80% {
-      transform: translate(-2px, -1px);
-    }
-
-    100% {
-      transform: translate(0px, 0px);
-    }
+    0% { transform: translate(0px, 0px); }
+    20% { transform: translate(1px, -1px); }
+    40% { transform: translate(-1px, 1px); }
+    60% { transform: translate(2px, 0px); }
+    80% { transform: translate(-2px, -1px); }
+    100% { transform: translate(0px, 0px); }
   }
 
-  /* =============================== HEADER BASE + GLITCH BAR =============================== */
   .govuk-header,
   .nhsuk-header {
     position: relative;
@@ -220,115 +330,97 @@
     animation: headerJitter 2.8s infinite;
   }
 
-  /* blue bar pixel corruption layer */
   .govuk-header::before,
   .nhsuk-header::before {
     content: "";
     position: absolute;
     inset: 0;
     background: #005eb8;
-    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px), linear-gradient(0deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+
+    background-image:
+      linear-gradient(
+        90deg,
+        rgba(255,255,255,0.08) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        0deg,
+        rgba(255,255,255,0.05) 1px,
+        transparent 1px
+      );
+
     background-size: 6px 6px;
     mix-blend-mode: overlay;
     opacity: 0.75;
-    animation: pixelShift 0.6s infinite steps(2, end), barNoise 1.8s infinite;
+
+    animation:
+      pixelShift 0.6s infinite steps(2, end),
+      barNoise 1.8s infinite;
+
     pointer-events: none;
   }
 
-  /* slice tearing layer */
   .govuk-header::after,
   .nhsuk-header::after {
     content: "";
     position: absolute;
     inset: 0;
     background: #005eb8;
-    clip-path: polygon(0 0, 100% 0, 100% 18%, 0 22%, 100% 26%, 0 32%, 100% 38%, 0 44%, 100% 52%, 0 58%, 100% 66%, 0 74%, 100% 82%, 0 90%, 100% 100%, 0 100%);
+
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 18%,
+      0 22%,
+      100% 26%,
+      0 32%,
+      100% 38%,
+      0 44%,
+      100% 52%,
+      0 58%,
+      100% 66%,
+      0 74%,
+      100% 82%,
+      0 90%,
+      100% 100%,
+      0 100%
+    );
+
     opacity: 0.6;
     animation: sliceJitter 1.2s infinite linear;
     pointer-events: none;
   }
 
   @keyframes pixelShift {
-    0% {
-      transform: translate(0, 0);
-    }
-
-    25% {
-      transform: translate(1px, -1px);
-    }
-
-    50% {
-      transform: translate(-1px, 1px);
-    }
-
-    75% {
-      transform: translate(2px, 0);
-    }
-
-    100% {
-      transform: translate(0, 0);
-    }
+    0% { transform: translate(0,0); }
+    25% { transform: translate(1px,-1px); }
+    50% { transform: translate(-1px,1px); }
+    75% { transform: translate(2px,0); }
+    100% { transform: translate(0,0); }
   }
 
   @keyframes barNoise {
-    0% {
-      filter: brightness(1) contrast(1.2);
-    }
-
-    50% {
-      filter: brightness(1.1) contrast(1.4);
-    }
-
-    100% {
-      filter: brightness(1) contrast(1.2);
-    }
+    0% { filter: brightness(1) contrast(1.2); }
+    50% { filter: brightness(1.1) contrast(1.4); }
+    100% { filter: brightness(1) contrast(1.2); }
   }
 
   @keyframes sliceJitter {
-    0% {
-      transform: translateX(0);
-    }
-
-    25% {
-      transform: translateX(-2px);
-    }
-
-    50% {
-      transform: translateX(2px);
-    }
-
-    75% {
-      transform: translateX(-1px);
-    }
-
-    100% {
-      transform: translateX(0);
-    }
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-2px); }
+    50% { transform: translateX(2px); }
+    75% { transform: translateX(-1px); }
+    100% { transform: translateX(0); }
   }
 
   @keyframes headerJitter {
-    0% {
-      transform: translate(0, 0);
-    }
-
-    25% {
-      transform: translate(1px, -1px);
-    }
-
-    50% {
-      transform: translate(-1px, 1px);
-    }
-
-    75% {
-      transform: translate(2px, 0);
-    }
-
-    100% {
-      transform: translate(0, 0);
-    }
+    0% { transform: translate(0,0); }
+    25% { transform: translate(1px,-1px); }
+    50% { transform: translate(-1px,1px); }
+    75% { transform: translate(2px,0); }
+    100% { transform: translate(0,0); }
   }
 
-  /* =============================== SERVICE NAME OVERRIDE =============================== */
   .govuk-header__service-name,
   .nhsuk-header__service-name {
     position: relative;
@@ -349,32 +441,31 @@
 
   @keyframes textGlitch {
     0% {
-      transform: translate(0, 0);
+      transform: translate(0,0);
       text-shadow: 1px 0 #00ffff, -1px 0 #ff0055;
     }
 
     25% {
-      transform: translate(1px, -1px);
+      transform: translate(1px,-1px);
       text-shadow: -2px 0 #00ffff, 2px 0 #ff0055;
     }
 
     50% {
-      transform: translate(-1px, 1px);
+      transform: translate(-1px,1px);
       text-shadow: 2px 0 #00ffff, -2px 0 #ff0055;
     }
 
     75% {
-      transform: translate(2px, 0);
+      transform: translate(2px,0);
       text-shadow: 1px 1px #00ffff, -1px -1px #ff0055;
     }
 
     100% {
-      transform: translate(0, 0);
+      transform: translate(0,0);
       text-shadow: 1px 0 #00ffff, -1px 0 #ff0055;
     }
   }
 
-  /* =============================== TYPOGRAPHY CORRUPTION =============================== */
   h1,
   h2,
   h3,
@@ -390,10 +481,9 @@
     color: red;
   }
 
-  /* =============================== LINKS INSTABILITY =============================== */
   a {
     display: inline-block;
-    transform: rotate(calc(var(--r, 0) * 1deg));
+    transform: rotate(calc(var(--r,0) * 1deg));
   }
 
   a:nth-of-type(odd) {
@@ -409,12 +499,11 @@
     text-decoration: underline wavy red;
   }
 
-  /* =============================== BUTTON CORRUPTION =============================== */
   .govuk-button,
   .nhsuk-button {
     transform: skewX(-6deg);
     animation: buttonShake 1.5s infinite;
-    box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 6px 6px 0 rgba(0,0,0,0.2);
   }
 
   @keyframes buttonShake {
@@ -431,27 +520,19 @@
     }
   }
 
-  /* =============================== CARDS DRIFT =============================== */
-  .nhsuk-card,
-  .govuk-summary-card {
-    transform: rotate(calc(var(--rot, 0) * 1deg));
-    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.15);
-  }
-
-  .nhsuk-card:nth-child(odd) {
-    --rot: -1;
-  }
-
-  .nhsuk-card:nth-child(even) {
-    --rot: 1;
-  }
-
-  /* =============================== FORM CORRUPTION =============================== */
   input,
   textarea,
   select {
     border: 2px dashed #ff0055 !important;
-    background: repeating-linear-gradient(45deg, #fff, #fff 10px, #f3f3f3 10px, #f3f3f3 20px);
+    background:
+      repeating-linear-gradient(
+        45deg,
+        #fff,
+        #fff 10px,
+        #f3f3f3 10px,
+        #f3f3f3 20px
+      );
+
     transform: skewX(-1deg);
   }
 
@@ -459,73 +540,71 @@
   textarea:focus,
   select:focus {
     outline: none;
-    box-shadow: 0 0 0 4px rgba(255, 0, 85, 0.4);
+    box-shadow:
+      0 0 0 4px rgba(255,0,85,0.4);
+
     transform: scale(1.01);
   }
 
-  /* =============================== SYSTEM FOOTER FLICKER =============================== */
   body::after {
     content: "SYSTEM DESYNC ACTIVE // DESIGN INTEGRITY LOST";
+
     position: fixed;
     bottom: 12px;
     left: 12px;
+
     background: black;
     color: lime;
+
     font-family: monospace;
     font-size: 12px;
+
     padding: 8px;
+
     z-index: 99999;
+
     animation: flicker 0.35s infinite;
+
     pointer-events: none;
   }
 
   @keyframes flicker {
     0% {
       opacity: 1;
-      transform: translate(0, 0);
+      transform: translate(0,0);
     }
 
     25% {
       opacity: 0.2;
-      transform: translate(1px, 0);
+      transform: translate(1px,0);
     }
 
     50% {
       opacity: 1;
-      transform: translate(-1px, 1px);
+      transform: translate(-1px,1px);
     }
 
     75% {
       opacity: 0.4;
-      transform: translate(2px, -1px);
+      transform: translate(2px,-1px);
     }
 
     100% {
       opacity: 1;
-      transform: translate(0, 0);
+      transform: translate(0,0);
     }
   }
 
-  /* =============================== PAGE BREATHING INSTABILITY =============================== */
   .govuk-width-container,
   .nhsuk-width-container {
     animation: breathe 14s infinite ease-in-out;
   }
 
   @keyframes breathe {
-    0% {
-      transform: scale(1);
-    }
-
-    50% {
-      transform: scale(1.003);
-    }
-
-    100% {
-      transform: scale(1);
-    }
+    0% { transform: scale(1); }
+    50% { transform: scale(1.003); }
+    100% { transform: scale(1); }
   }
 </style>
-
 
 {% endblock %}
